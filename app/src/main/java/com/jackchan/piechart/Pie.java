@@ -88,6 +88,7 @@ public class Pie extends View {
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
+		//获得当前控件的宽高
 		this.width = w;
 		this.height = h;
 		//为了防止绘制后超出屏幕区域,获取屏幕的宽高的较小值
@@ -103,7 +104,6 @@ public class Pie extends View {
 		touchRectF.top = -radius - 15;
 		touchRectF.right = radius + 15;
 		touchRectF.bottom = radius + 15;
-
 
 	}
 
