@@ -37,7 +37,7 @@ import java.util.List;
  * ============================================================
  */
 
-public class Pie extends View {
+public class PieChart extends View {
 
 	private List<PieEntity> entities;
 	private int width;
@@ -47,15 +47,15 @@ public class Pie extends View {
 	private Paint paint;
 	private Paint linePaint;
 
-	public Pie(Context context) {
+	public PieChart(Context context) {
 		this(context, null);
 	}
 
-	public Pie(Context context, AttributeSet attrs) {
+	public PieChart(Context context, AttributeSet attrs) {
 		this(context, attrs, 0);
 	}
 
-	public Pie(Context context, AttributeSet attrs, int defStyleAttr) {
+	public PieChart(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		init();
 	}

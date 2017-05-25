@@ -2,6 +2,128 @@
 
 <img src="art/piechart.jpg" width="400" />
 
+## 绘制饼状图分析
+
+1. 定义一个起始角度
+2. 计算每块扇形的弧度
+3. 遍历数据，每一个起始角度，是上一个扇形的结束角度
+4. 扇形的外接矩形的左上右下不需要计算，移动坐标系到屏幕中间
+
+![](art/绘制饼状图分析.png)
+
+## 绘制直线
+
+直线的两个要素：
+
+1. 直线的起点，这里是每块扇形的弧的中心点
+2. 直线的终点，这里是连接圆心和起点的延长线上某个点
+
+起点的计算：
+1. 获取对应扇形的弧度
+2. 扇形起始角度+弧度/2
+3. 半径*角度结果的余弦值，横坐标纵坐标同理
+
+终点的计算：起点计算的第三步将半径增大即可
+
+![](art/绘制直线.png)
+
+```
+//绘制直线
+//Math.toRadians(参数):指的是将参数的弧度转换为角度
+float startX = (float) (radius * Math.cos(Math.toRadians(startAngle + sweepAngle / 2)));
+float startY = (float) (radius * Math.sin(Math.toRadians(startAngle + sweepAngle / 2)));
+float endX = (float) ((radius + 30) * Math.cos(Math.toRadians(startAngle + sweepAngle / 2)));
+float endY = (float) ((radius + 30) * Math.sin(Math.toRadians(startAngle + sweepAngle / 2)));
+canvas.drawLine(startX, startY, endX, endY, linePaint);
+```
+
+
+
+## 判断点击位置所在的扇形区域
+
+![](art/判断点击位置所在的扇形区域.png)
+
+将点击的坐标位置转化为以饼状图中心为原点的坐标，对坐标进行处理，将坐标转化为点击的角度，判断是否处于某一个饼状图所在的角度区域
+
+```java
+public class MathUtil {
+	public static float getTouchAngle(float x, float y) {
+		float touchAngle = 0;
+		if (x < 0 && y < 0) {  //2 象限
+			touchAngle += 180;
+		} else if (y < 0 && x > 0) {  //1象限
+			touchAngle += 360;
+		} else if (y > 0 && x < 0) {  //3象限
+			touchAngle += 180;
+		}
+		//Math.atan(y/x) 返回正数值表示相对于 x 轴的逆时针转角，返回负数值则表示顺时针转角。
+		//返回值乘以 180/π，将弧度转换为角度。
+		touchAngle += Math.toDegrees(Math.atan(y / x));
+		if (touchAngle < 0) {
+			touchAngle = touchAngle + 360;
+		}
+		return touchAngle;
+	}
+}
+```
+
+处理触摸事件
+
+```
+//当用户与手机屏幕进行交互的时候(触摸)
+	//触摸事件处理
+	//1,按下去
+	//2,移动
+	//3,抬起
+	//参数:触摸事件,这个事件是由用户与屏幕交互产生的,这个事件包含上述三种情况
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		//获取用户对屏幕的行为
+		int action = event.getAction();
+		switch (action) {
+			case MotionEvent.ACTION_DOWN:
+				//做点击范围的认定
+				//获取用户点击的位置距当前视图的左边缘的距离
+				float x = event.getX();
+				float y = event.getY();
+				//将点击的x和y坐标转换为以饼状图为圆心的坐标
+				x = x - width / 2;
+				y = y - height / 2;
+				float touchAngle = MathUtil.getTouchAngle(x, y);
+				float touchRadius = (float) Math.sqrt(x * x + y * y);
+				//判断触摸的点距离饼状图圆心的距离<饼状图对应圆的圆心
+				if (touchRadius < radius) {
+					//说明是一个有效点击区域
+					//查找触摸的角度是否位于起始角度集合中
+					//binarySearch:参数2在参数1对应的集合中的索引
+					//未找到,则返回 -(和搜索的值附近的大于搜索值的正确值对应的索引值+1)
+					//{1,2,3}
+					//搜索1:返回值1在集合中对应的索引0
+					//1.2:返回值为 -(1+1) -2
+					//1.8:返回值 -(1+1) -2
+					int searchResult = Arrays.binarySearch(startAngles, touchAngle);
+					if (searchResult < 0) {
+						position = -searchResult - 1 - 1;
+					} else {
+						position = searchResult;
+					}
+					Log.i("test", "position:" + position);
+					//让onDraw方法重新调用:
+					//重绘
+					invalidate();
+				}
+				break;
+			case MotionEvent.ACTION_MOVE:
+
+				break;
+			case MotionEvent.ACTION_UP:
+
+				break;
+		}
+		return super.onTouchEvent(event);
+	}
+```
+
 ## 定义基本信息载体，即javabean
 
 ```java
